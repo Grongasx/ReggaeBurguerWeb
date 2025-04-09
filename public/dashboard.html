@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            color: #666;
+            font-size: 18px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #e63939;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bem-vindo ao Dashboard</h1>
+        <p id="welcomeMessage">Carregando...</p>
+        <button id="logoutButton">Sair</button>
+    </div>
+
+    <script>
+        async function fetchUserData() {
+            const token = localStorage.getItem('token'); // Recupera o token do localStorage
+            if (!token) {
+                alert('Acesso negado! Faça login para acessar o dashboard.');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/me', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}` // Envia o token no cabeçalho
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('welcomeMessage').textContent = `Olá, ${data.name}!`;
+                } else {
+                    alert('Sessão expirada ou inválida. Faça login novamente.');
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Erro ao obter dados do usuário:', error);
+                alert('Erro ao se conectar ao servidor.');
+                localStorage.removeItem('token');
+                window.location.href = '/login.html';
+            }
+        }
+
+        fetchUserData();
+
+        // Botão de logout
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = '/login.html';
+        });
+    </script>
+</body>
+</html>
